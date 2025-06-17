@@ -105,12 +105,20 @@
              box-shadow: 0 4px 15px rgba(40, 167, 69, 0.2);
         }
 
+        /* UPDATED: Flexbox layout for emoji options */
+        .emoji-options {
+            display: flex;
+            flex-wrap: wrap; /* Allows emojis to wrap to the next line */
+            justify-content: center; /* Centers the emojis */
+            gap: 20px; /* Provides consistent spacing */
+            margin: 2rem 0;
+        }
+
         .emoji-button {
-            font-size: 65px;
+            font-size: 60px; /* Slightly reduced for better wrapping */
             cursor: pointer;
-            margin: 0 10px;
             transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            display: inline-block; /* Allows transform to work */
+            display: inline-block;
         }
 
         .emoji-button:hover {
@@ -144,7 +152,7 @@
         }
         
         .reason-button .emoji {
-            font-size: 1.5rem; /* Make reason emojis a nice size */
+            font-size: 1.5rem;
         }
 
         /* Teacher check-in request styling */
@@ -161,9 +169,9 @@
         #teacher-checkin label {
              cursor: pointer; 
              margin-left: 8px; 
-             display: flex; /* Use flexbox for alignment */
+             display: flex;
              align-items: center;
-             gap: 10px; /* Space between emoji and text */
+             gap: 10px;
         }
 
         #request-checkin-checkbox {
@@ -203,12 +211,13 @@
         <div id="checkin-ui">
             <h2 id="welcome-message"></h2>
             <p>How are you feeling today?</p>
-            <div class="emoji-options" style="margin: 2rem 0;">
-                <span class="emoji-button" onclick="selectEmotion('Happy')" role="button" aria-label="Happy">😊</span>
-                <span class="emoji-button" onclick="selectEmotion('Content')" role="button" aria-label="Content">🙂</span>
-                <span class="emoji-button" onclick="selectEmotion('Neutral')" role="button" aria-label="Neutral">😐</span>
-                <span class="emoji-button" onclick="selectEmotion('Sad')" role="button" aria-label="Sad">🙁</span>
+            <!-- UPDATED: Emojis are re-ordered -->
+            <div class="emoji-options">
                 <span class="emoji-button" onclick="selectEmotion('Upset')" role="button" aria-label="Upset">😭</span>
+                <span class="emoji-button" onclick="selectEmotion('Sad')" role="button" aria-label="Sad">🙁</span>
+                <span class="emoji-button" onclick="selectEmotion('Neutral')" role="button" aria-label="Neutral">😐</span>
+                <span class="emoji-button" onclick="selectEmotion('Content')" role="button" aria-label="Content">🙂</span>
+                <span class="emoji-button" onclick="selectEmotion('Happy')" role="button" aria-label="Happy">😊</span>
             </div>
         </div>
 
@@ -254,45 +263,33 @@
 
         function handleSuccessfulScan(decodedText, decodedResult) {
             studentId = decodedText;
-            // UPDATED: Changed the greeting text
-            document.getElementById('welcome-message').innerText = 'Hi!';
-            // The scanner is now stopped inside the success callback, so no action is needed here.
+            document.getElementById('welcome-message').innerText = 'Welcome!';
             showView('checkin-ui');
         }
 
-        // --- UPDATED: STREAMLINED SCANNER ACTIVATION ---
         const startScanBtn = document.getElementById('start-scan-btn');
         startScanBtn.addEventListener('click', () => {
-            // Hide the button immediately to prevent multiple clicks
             startScanBtn.style.display = 'none';
-
-            // Use the more direct Html5Qrcode class
             const html5QrCode = new Html5Qrcode("scanner");
             const config = { fps: 10, qrbox: { width: 250, height: 250 } };
-
-            // Define the success callback. It now also stops the scanner.
             const qrCodeSuccessCallback = (decodedText, decodedResult) => {
                 if (html5QrCode && html5QrCode.isScanning) {
                     html5QrCode.stop().then(ignore => {
                         handleSuccessfulScan(decodedText, decodedResult);
                     }).catch(err => {
                         console.error("Failed to stop scanning.", err);
-                        handleSuccessfulScan(decodedText, decodedResult); // Proceed even if stop fails
+                        handleSuccessfulScan(decodedText, decodedResult);
                     });
                 }
             };
-
-            // Start scanning. This will try the rear camera first ('environment').
             html5QrCode.start({ facingMode: "environment" }, config, qrCodeSuccessCallback)
                 .catch(err => {
-                    // This error means the rear camera might not be available.
                     console.log("Rear camera failed, trying any available camera...", err);
-                    html5QrCode.start({ }, config, qrCodeSuccessCallback) // Fallback to any camera
+                    html5QrCode.start({ }, config, qrCodeSuccessCallback)
                         .catch(err => {
-                            // This means no cameras could be started.
                             alert("Could not start QR scanner. Please ensure camera permissions are enabled for this site.");
                             console.error("Failed to start scanner", err);
-                            startScanBtn.style.display = 'inline-block'; // Show the button again
+                            startScanBtn.style.display = 'inline-block';
                         });
                 });
         });
@@ -326,7 +323,6 @@
 
             const teacherCheckinRequested = document.getElementById('request-checkin-checkbox').checked ? 'Yes' : 'No';
             
-            // --- LIVE FORM SUBMISSION ---
             const formId = "1FAIpQLSeCikiFVOX1Skl9HWWfmzLFJn6_lI-QqO2nWas0m6Qp8-72aQ";
             const entry_studentId = "entry.38022795";
             const entry_wellbeingStatus = "entry.1222227123";
@@ -339,7 +335,6 @@
                               `${entry_reason}=${encodeURIComponent(selectedReason)}&` +
                               `${entry_teacherCheckin}=${encodeURIComponent(teacherCheckinRequested)}`;
             
-            // The try...catch block sends the data to your Google Form.
             try {
                 await fetch(submitUrl, { method: 'POST', mode: 'no-cors' });
                 showView('success-message');
@@ -348,13 +343,11 @@
                 alert('There was an error saving your check-in. Please try again.');
             }
 
-            // Reset the app for the next user after a delay.
             setTimeout(() => {
                  showView('scanner-container');
                  document.getElementById('request-checkin-checkbox').checked = false;
                  selectedReason = null;
                  document.querySelectorAll('#reason-buttons-container .reason-button').forEach(btn => btn.classList.remove('selected'));
-                 // Show the scan button again for the next user.
                  startScanBtn.style.display = 'inline-block';
             }, 4000);
         }
