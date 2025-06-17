@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wellbeing Check-in App</title>
+    <style>
+        /* --- Google Font Import --- */
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap');
+
+        /* --- Base Styles & Layout --- */
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            text-align: center;
+            padding: 1rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .app-container {
+            background-color: #ffffff;
+            width: 100%;
+            max-width: 420px;
+            padding: 2rem;
+            border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease-in-out;
+        }
+
+        /* --- UI Section Visibility --- */
+        #scanner-container,
+        #checkin-ui,
+        #reasons-ui,
+        #success-message {
+            display: none; /* All sections are hidden by default */
+        }
+        
+        #scanner-container.active,
+        #checkin-ui.active,
+        #reasons-ui.active,
+        #success-message.active {
+            display: block; /* The "active" section is shown */
+        }
+
+        /* --- Component Styles --- */
+        h1, h2, h3 {
+            color: #4a4a4a;
+            font-weight: 700;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+        }
+
+        p {
+            color: #6c757d;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        #scanner {
+            width: 250px;
+            height: 250px; /* Give scanner a defined size */
+            border: 3px dashed #e0e0e0;
+            border-radius: 16px;
+            margin: 25px auto;
+            overflow: hidden;
+            background-color: #fafafa;
+        }
+        
+        /* General purpose button styling */
+        .action-button {
+             font-family: 'Nunito', sans-serif;
+             font-weight: 700;
+             font-size: 1rem;
+             padding: 14px 28px;
+             border: none;
+             border-radius: 50px;
+             background: linear-gradient(45deg, #007bff, #0056b3);
+             color: white;
+             cursor: pointer;
+             transition: all 0.3s ease;
+             box-shadow: 0 4px 15px rgba(0, 123, 255, 0.2);
+             margin-top: 20px;
+        }
+
+        .action-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 20px rgba(0, 123, 255, 0.3);
+        }
+        
+        .action-button.submit {
+            background: linear-gradient(45deg, #28a745, #218838);
+             box-shadow: 0 4px 15px rgba(40, 167, 69, 0.2);
+        }
+
+        .emoji-button {
+            font-size: 65px;
+            cursor: pointer;
+            margin: 0 10px;
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: inline-block; /* Allows transform to work */
+        }
+
+        .emoji-button:hover {
+            transform: scale(1.3);
+        }
+        
+        /* Styling for the list of reasons */
+        .reason-button {
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 10px; 
+            width: 100%;
+            margin: 12px auto;
+            padding: 16px;
+            font-size: 1rem;
+            font-family: 'Nunito', sans-serif;
+            font-weight: 700;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            background-color: #f8f9fa;
+            color: #4a4a4a;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .reason-button.selected {
+            background-color: #d4edda; /* Light green to show selection */
+            border-color: #28a745;
+            color: #155724;
+        }
+        
+        .reason-button .emoji {
+            font-size: 1.5rem; /* Make reason emojis a nice size */
+        }
+
+        /* Teacher check-in request styling */
+        #teacher-checkin {
+            margin-top: 25px;
+            padding: 16px;
+            background-color: #fff9e6;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #teacher-checkin label {
+             cursor: pointer; 
+             margin-left: 8px; 
+             display: flex; /* Use flexbox for alignment */
+             align-items: center;
+             gap: 10px; /* Space between emoji and text */
+        }
+
+        #request-checkin-checkbox {
+            width: 22px;
+            height: 22px;
+            accent-color: #007bff;
+        }
+        
+        #success-message h2 {
+            color: #28a745;
+            font-size: 2rem;
+        }
+
+        .success-emoji {
+            font-size: 6rem;
+            animation: bounce 0.8s ease-in-out;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- View 1: QR Code Scanner -->
+        <div id="scanner-container">
+            <h1>Wellbeing Check-in</h1>
+            <p>Please scan your code to begin.</p>
+            <div id="scanner"></div>
+            <!-- FOR TESTING: This button simulates a scan. -->
+            <button id="simulate-scan-btn" class="action-button">Simulate Scan</button>
+            
+            <!-- FOR LIVE APP: This button will start the real scanner. -->
+            <!-- <button id="start-scan-btn" class="action-button">Start Scanning</button> -->
+        </div>
+
+        <!-- View 2: Emoji Selection -->
+        <div id="checkin-ui">
+            <h2 id="welcome-message"></h2>
+            <p>How are you feeling today?</p>
+            <div class="emoji-options" style="margin: 2rem 0;">
+                <span class="emoji-button" onclick="selectEmotion('Happy')" role="button" aria-label="Happy">😊</span>
+                <span class="emoji-button" onclick="selectEmotion('Content')" role="button" aria-label="Content">🙂</span>
+                <span class="emoji-button" onclick="selectEmotion('Neutral')" role="button" aria-label="Neutral">😐</span>
+                <span class="emoji-button" onclick="selectEmotion('Sad')" role="button" aria-label="Sad">🙁</span>
+                <span class="emoji-button" onclick="selectEmotion('Upset')" role="button" aria-label="Upset">😭</span>
+            </div>
+        </div>
+
+        <!-- View 3: Reasons & Teacher Check-in -->
+        <div id="reasons-ui">
+            <h3>I'm sorry to hear that.<br>What's on your mind?</h3>
+            <div id="reason-buttons-container">
+                <button class="reason-button" onclick="selectReason(this, 'Trouble with friends')"><span class="emoji">👥</span> Trouble with friends</button>
+                <button class="reason-button" onclick="selectReason(this, 'Hard schoolwork')"><span class="emoji">📚</span> Hard schoolwork</button>
+                <button class="reason-button" onclick="selectReason(this, 'Feeling unwell')"><span class="emoji">🤒</span> Feeling unwell</button>
+                <button class="reason-button" onclick="selectReason(this, 'Something at home')"><span class="emoji">🏠</span> Something at home</button>
+                <button class="reason-button" onclick="selectReason(this, 'I don\'t know')"><span class="emoji">🤷</span> I don't know</button>
+            </div>
+            <div id="teacher-checkin">
+                <input type="checkbox" id="request-checkin-checkbox">
+                <label for="request-checkin-checkbox"><span class="emoji">👩‍🏫</span> Ask a teacher to check in with me.</label>
+            </div>
+            <button id="final-submit-btn" class="action-button submit" onclick="submitFinalResponse()">Submit Check-in</button>
+        </div>
+
+        <!-- View 4: Success Message -->
+        <div id="success-message">
+            <div class="success-emoji">👍</div>
+            <h2>Thank You!</h2>
+            <p>Your check-in has been recorded.</p>
+        </div>
+    </div>
+    
+    <!-- This library is required for the real QR scanner to work -->
+    <script src="https://unpkg.com/html5-qrcode/html5-qrcode.min.js"></script>
+
+    <!-- The App's Core JavaScript Logic -->
+    <script>
+        // Store student data during the check-in process
+        let studentId = null;
+        let selectedEmotion = null;
+        let selectedReason = null;
+
+        function showView(viewId) {
+            document.querySelectorAll('.app-container > div').forEach(div => div.classList.remove('active'));
+            document.getElementById(viewId)?.classList.add('active');
+        }
+
+        function handleSuccessfulScan(decodedText, decodedResult) {
+            studentId = decodedText;
+            document.getElementById('welcome-message').innerText = `Hello, ${studentId}!`;
+            if (window.html5QrcodeScanner) {
+                window.html5QrcodeScanner.clear(); // Stop the real scanner
+            }
+            showView('checkin-ui');
+        }
+
+        // --- SECTION TO EDIT FOR LIVE APP ---
+
+        
+        
+        // For LIVE APP: Uncomment the code below to use the real camera scanner.
+        
+        const startScanBtn = document.getElementById('start-scan-btn');
+        startScanBtn.addEventListener('click', () => {
+            window.html5QrcodeScanner = new Html5QrcodeScanner(
+                "scanner", { fps: 10, qrbox: {width: 250, height: 250} });
+            window.html5QrcodeScanner.render(handleSuccessfulScan);
+            startScanBtn.style.display = 'none'; // Hide button after starting
+        });
+        
+
+        // --- END SECTION TO EDIT ---
+
+
+        function selectEmotion(emotion) {
+            selectedEmotion = emotion;
+            if (['Happy', 'Content', 'Neutral'].includes(emotion)) {
+                selectedReason = 'N/A';
+                submitFinalResponse();
+            } else {
+                showView('reasons-ui');
+            }
+        }
+
+        function selectReason(element, reason) {
+            selectedReason = reason;
+            document.querySelectorAll('#reason-buttons-container .reason-button').forEach(btn => btn.classList.remove('selected'));
+            element.classList.add('selected');
+        }
+
+        async function submitFinalResponse() {
+            if ((['Sad', 'Upset'].includes(selectedEmotion)) && !selectedReason) {
+                alert("Please select a reason before submitting.");
+                return;
+            }
+            if (!studentId || !selectedEmotion) {
+                alert("Something went wrong. Please scan your code again.");
+                showView('scanner-container');
+                return;
+            }
+
+            const teacherCheckinRequested = document.getElementById('request-checkin-checkbox').checked ? 'Yes' : 'No';
+            
+            // --- SECTION TO EDIT FOR LIVE APP ---
+            // 1. Replace these placeholders with your actual IDs from Step 2.
+            const formId = "1FAIpQLSeCikiFVOX1Skl9HWWfmzLFJn6_lI-QqO2nWas0m6Qp8-72aQ";
+            const entry_studentId = "entry.38022795";
+            const entry_wellbeingStatus = "entry.1222227123";
+            const entry_reason = "entry.1498652664";
+            const entry_teacherCheckin = "entry.1178975688";
+
+            // 2. This part constructs the URL to send the data.
+            const submitUrl = `https://docs.google.com/forms/d/e/${formId}/formResponse?` +
+                              `${entry_studentId}=${encodeURIComponent(studentId)}&` +
+                              `${entry_wellbeingStatus}=${encodeURIComponent(selectedEmotion)}&` +
+                              `${entry_reason}=${encodeURIComponent(selectedReason)}&` +
+                              `${entry_teacherCheckin}=${encodeURIComponent(teacherCheckinRequested)}`;
+            
+            // 3. For the LIVE APP, uncomment the 'try...catch' block below.
+            /*
+            try {
+                await fetch(submitUrl, { method: 'POST', mode: 'no-cors' });
+                // The code below runs if submission is successful
+                showView('success-message');
+            } catch (error) {
+                console.error('Error submitting form:', error);
+                alert('There was an error saving your check-in. Please try again.');
+            }
+            */
+            
+            // For TESTING: This just logs to console and shows success.
+            console.log("Submitting to URL:", submitUrl); // You can check the URL here.
+            showView('success-message');
+            // --- END SECTION TO EDIT ---
+
+            // Reset the app for the next user after a delay.
+            setTimeout(() => {
+                 showView('scanner-container');
+                 document.getElementById('request-checkin-checkbox').checked = false;
+                 selectedReason = null;
+                 document.querySelectorAll('#reason-buttons-container .reason-button').forEach(btn => btn.classList.remove('selected'));
+            }, 4000);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            showView('scanner-container');
+        });
+    </script>
+</body>
+</html>
