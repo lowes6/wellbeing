@@ -196,11 +196,8 @@
             <h1>Wellbeing Check-in</h1>
             <p>Please scan your code to begin.</p>
             <div id="scanner"></div>
-            <!-- FOR TESTING: This button simulates a scan. -->
-            <button id="simulate-scan-btn" class="action-button">Simulate Scan</button>
-            
-            <!-- FOR LIVE APP: This button will start the real scanner. -->
-            <!-- <button id="start-scan-btn" class="action-button">Start Scanning</button> -->
+            <!-- FIXED: The real "Start Scanning" button is now active -->
+            <button id="start-scan-btn" class="action-button">Start Scanning</button>
         </div>
 
         <!-- View 2: Emoji Selection -->
@@ -265,12 +262,8 @@
             showView('checkin-ui');
         }
 
-        // --- SECTION TO EDIT FOR LIVE APP ---
-
-        
-        
-        // For LIVE APP: Uncomment the code below to use the real camera scanner.
-        
+        // --- LIVE APP SCANNER ACTIVATION ---
+        // This code looks for the "Start Scanning" button and activates the camera when clicked.
         const startScanBtn = document.getElementById('start-scan-btn');
         startScanBtn.addEventListener('click', () => {
             window.html5QrcodeScanner = new Html5QrcodeScanner(
@@ -279,10 +272,6 @@
             startScanBtn.style.display = 'none'; // Hide button after starting
         });
         
-
-        // --- END SECTION TO EDIT ---
-
-
         function selectEmotion(emotion) {
             selectedEmotion = emotion;
             if (['Happy', 'Content', 'Neutral'].includes(emotion)) {
@@ -312,37 +301,27 @@
 
             const teacherCheckinRequested = document.getElementById('request-checkin-checkbox').checked ? 'Yes' : 'No';
             
-            // --- SECTION TO EDIT FOR LIVE APP ---
-            // 1. Replace these placeholders with your actual IDs from Step 2.
+            // --- LIVE FORM SUBMISSION ---
             const formId = "1FAIpQLSeCikiFVOX1Skl9HWWfmzLFJn6_lI-QqO2nWas0m6Qp8-72aQ";
             const entry_studentId = "entry.38022795";
             const entry_wellbeingStatus = "entry.1222227123";
             const entry_reason = "entry.1498652664";
             const entry_teacherCheckin = "entry.1178975688";
 
-            // 2. This part constructs the URL to send the data.
             const submitUrl = `https://docs.google.com/forms/d/e/${formId}/formResponse?` +
                               `${entry_studentId}=${encodeURIComponent(studentId)}&` +
                               `${entry_wellbeingStatus}=${encodeURIComponent(selectedEmotion)}&` +
                               `${entry_reason}=${encodeURIComponent(selectedReason)}&` +
                               `${entry_teacherCheckin}=${encodeURIComponent(teacherCheckinRequested)}`;
             
-            // 3. For the LIVE APP, uncomment the 'try...catch' block below.
-            /*
+            // The try...catch block sends the data to your Google Form.
             try {
                 await fetch(submitUrl, { method: 'POST', mode: 'no-cors' });
-                // The code below runs if submission is successful
                 showView('success-message');
             } catch (error) {
                 console.error('Error submitting form:', error);
                 alert('There was an error saving your check-in. Please try again.');
             }
-            */
-            
-            // For TESTING: This just logs to console and shows success.
-            console.log("Submitting to URL:", submitUrl); // You can check the URL here.
-            showView('success-message');
-            // --- END SECTION TO EDIT ---
 
             // Reset the app for the next user after a delay.
             setTimeout(() => {
@@ -350,6 +329,8 @@
                  document.getElementById('request-checkin-checkbox').checked = false;
                  selectedReason = null;
                  document.querySelectorAll('#reason-buttons-container .reason-button').forEach(btn => btn.classList.remove('selected'));
+                 // Show the scan button again for the next user.
+                 startScanBtn.style.display = 'inline-block';
             }, 4000);
         }
 
