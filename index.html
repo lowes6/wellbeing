@@ -196,7 +196,6 @@
             <h1>Wellbeing Check-in</h1>
             <p>Please scan your code to begin.</p>
             <div id="scanner"></div>
-            <!-- FIXED: The real "Start Scanning" button is now active -->
             <button id="start-scan-btn" class="action-button">Start Scanning</button>
         </div>
 
@@ -256,20 +255,45 @@
         function handleSuccessfulScan(decodedText, decodedResult) {
             studentId = decodedText;
             document.getElementById('welcome-message').innerText = `Hello, ${studentId}!`;
-            if (window.html5QrcodeScanner) {
-                window.html5QrcodeScanner.clear(); // Stop the real scanner
-            }
+            // The scanner is now stopped inside the success callback, so no action is needed here.
             showView('checkin-ui');
         }
 
-        // --- LIVE APP SCANNER ACTIVATION ---
-        // This code looks for the "Start Scanning" button and activates the camera when clicked.
+        // --- UPDATED: STREAMLINED SCANNER ACTIVATION ---
         const startScanBtn = document.getElementById('start-scan-btn');
         startScanBtn.addEventListener('click', () => {
-            window.html5QrcodeScanner = new Html5QrcodeScanner(
-                "scanner", { fps: 10, qrbox: {width: 250, height: 250} });
-            window.html5QrcodeScanner.render(handleSuccessfulScan);
-            startScanBtn.style.display = 'none'; // Hide button after starting
+            // Hide the button immediately to prevent multiple clicks
+            startScanBtn.style.display = 'none';
+
+            // Use the more direct Html5Qrcode class
+            const html5QrCode = new Html5Qrcode("scanner");
+            const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+
+            // Define the success callback. It now also stops the scanner.
+            const qrCodeSuccessCallback = (decodedText, decodedResult) => {
+                if (html5QrCode && html5QrCode.isScanning) {
+                    html5QrCode.stop().then(ignore => {
+                        handleSuccessfulScan(decodedText, decodedResult);
+                    }).catch(err => {
+                        console.error("Failed to stop scanning.", err);
+                        handleSuccessfulScan(decodedText, decodedResult); // Proceed even if stop fails
+                    });
+                }
+            };
+
+            // Start scanning. This will try the rear camera first ('environment').
+            html5QrCode.start({ facingMode: "environment" }, config, qrCodeSuccessCallback)
+                .catch(err => {
+                    // This error means the rear camera might not be available.
+                    console.log("Rear camera failed, trying any available camera...", err);
+                    html5QrCode.start({ }, config, qrCodeSuccessCallback) // Fallback to any camera
+                        .catch(err => {
+                            // This means no cameras could be started.
+                            alert("Could not start QR scanner. Please ensure camera permissions are enabled for this site.");
+                            console.error("Failed to start scanner", err);
+                            startScanBtn.style.display = 'inline-block'; // Show the button again
+                        });
+                });
         });
         
         function selectEmotion(emotion) {
