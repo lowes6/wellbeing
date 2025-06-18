@@ -68,6 +68,14 @@
             font-size: 1.1rem;
             line-height: 1.6;
         }
+        
+        /* NEW: Style for the Student ID display */
+        #student-id-display {
+            font-size: 0.9rem;
+            color: #888;
+            margin-top: -10px;
+            margin-bottom: 20px;
+        }
 
         #scanner {
             width: 250px;
@@ -211,7 +219,8 @@
         <div id="checkin-ui">
             <h2 id="welcome-message"></h2>
             <p>How are you feeling today?</p>
-            <!-- UPDATED: Emojis are re-ordered -->
+            <!-- NEW: Element to display the student's ID -->
+            <p id="student-id-display"></p>
             <div class="emoji-options">
                 <span class="emoji-button" onclick="selectEmotion('Upset')" role="button" aria-label="Upset">😭</span>
                 <span class="emoji-button" onclick="selectEmotion('Sad')" role="button" aria-label="Sad">🙁</span>
@@ -263,7 +272,9 @@
 
         function handleSuccessfulScan(decodedText, decodedResult) {
             studentId = decodedText;
-            document.getElementById('welcome-message').innerText = 'Hi!';
+            document.getElementById('welcome-message').innerText = 'Welcome!';
+            // NEW: Display the scanned ID for verification
+            document.getElementById('student-id-display').innerText = 'ID: ' + studentId;
             showView('checkin-ui');
         }
 
