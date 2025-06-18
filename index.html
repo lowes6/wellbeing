@@ -273,7 +273,7 @@
 
         function handleSuccessfulScan(decodedText, decodedResult) {
             studentId = decodedText;
-            document.getElementById('welcome-message').innerText = 'Welcome!';
+            document.getElementById('welcome-message').innerText = 'Hello!';
             // UPDATED: Display the scanned ID for verification without the "ID: " prefix
             document.getElementById('student-id-display').innerText = studentId;
             showView('checkin-ui');
