@@ -69,12 +69,12 @@
             line-height: 1.6;
         }
         
-        /* NEW: Style for the Student ID display */
+        /* UPDATED: Style for the Student ID display */
         #student-id-display {
             font-size: 0.9rem;
-            color: #888;
-            margin-top: -10px;
-            margin-bottom: 20px;
+            color: #aaa;
+            margin-top: 20px; /* Provides space below emojis */
+            margin-bottom: 0;
         }
 
         #scanner {
@@ -119,7 +119,8 @@
             flex-wrap: wrap; /* Allows emojis to wrap to the next line */
             justify-content: center; /* Centers the emojis */
             gap: 20px; /* Provides consistent spacing */
-            margin: 2rem 0;
+            margin-top: 2rem;
+            margin-bottom: 0;
         }
 
         .emoji-button {
@@ -219,8 +220,6 @@
         <div id="checkin-ui">
             <h2 id="welcome-message"></h2>
             <p>How are you feeling today?</p>
-            <!-- NEW: Element to display the student's ID -->
-            <p id="student-id-display"></p>
             <div class="emoji-options">
                 <span class="emoji-button" onclick="selectEmotion('Upset')" role="button" aria-label="Upset">😭</span>
                 <span class="emoji-button" onclick="selectEmotion('Sad')" role="button" aria-label="Sad">🙁</span>
@@ -228,6 +227,8 @@
                 <span class="emoji-button" onclick="selectEmotion('Content')" role="button" aria-label="Content">🙂</span>
                 <span class="emoji-button" onclick="selectEmotion('Happy')" role="button" aria-label="Happy">😊</span>
             </div>
+            <!-- UPDATED: Element to display the student's ID moved to below the emojis -->
+            <p id="student-id-display"></p>
         </div>
 
         <!-- View 3: Reasons & Teacher Check-in -->
@@ -273,8 +274,8 @@
         function handleSuccessfulScan(decodedText, decodedResult) {
             studentId = decodedText;
             document.getElementById('welcome-message').innerText = 'Welcome!';
-            // NEW: Display the scanned ID for verification
-            document.getElementById('student-id-display').innerText = 'ID: ' + studentId;
+            // UPDATED: Display the scanned ID for verification without the "ID: " prefix
+            document.getElementById('student-id-display').innerText = studentId;
             showView('checkin-ui');
         }
 
