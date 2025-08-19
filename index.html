@@ -41,16 +41,15 @@
         #reasons-ui,
         #teacher-checkin-modal,
         #success-message {
-            display: none; /* All sections are hidden by default */
+            display: none;
         }
-        
         #scanner-container.active,
         #checkin-ui.active,
         #zones-ui.active,
         #reasons-ui.active,
         #teacher-checkin-modal.active,
         #success-message.active {
-            display: block; /* The "active" section is shown */
+            display: block;
         }
 
         /* --- Component Styles --- */
@@ -58,12 +57,10 @@
             color: #4a4a4a;
             font-weight: 700;
         }
-
         h1 { font-size: 1.8rem; }
         h2 { font-size: 1.5rem; }
         p  { color: #6c757d; font-size: 1.1rem; line-height: 1.6; }
-        
-        /* Student ID display */
+
         #student-id-display {
             font-size: 0.9rem;
             color: #aaa;
@@ -81,8 +78,7 @@
             overflow: hidden;
             background-color: #fafafa;
         }
-        
-        /* Buttons */
+
         .action-button {
              font-family: 'Nunito', sans-serif;
              font-weight: 700;
@@ -110,7 +106,6 @@
             box-shadow: 0 4px 15px rgba(108,117,125,0.2);
         }
 
-        /* Emojis */
         .emoji-options {
             display: flex;
             flex-wrap: wrap;
@@ -127,7 +122,7 @@
         }
         .emoji-button:hover { transform: scale(1.3); }
 
-        /* Zones of Regulation (visual choice) */
+        /* Zones of Regulation */
         .zones-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -186,7 +181,7 @@
         }
         .reason-button .emoji { font-size: 1.5rem; }
 
-        /* Teacher Check-in Modal (prominent option box) */
+        /* Teacher Check-in Modal */
         #teacher-checkin-modal {
             position: fixed;
             inset: 0;
@@ -234,6 +229,15 @@
             0%, 100% { transform: translateY(0); }
             50% { transform: translateY(-15px); }
         }
+
+        /* Small empathetic banner on Zones screen (shown only for Sad/Upset) */
+        .zone-ack {
+            display: none;
+            margin: 0 0 8px 0;
+            color: #495057;
+            font-weight: 700;
+        }
+        .zone-ack.visible { display: block; }
     </style>
 </head>
 <body>
@@ -264,6 +268,9 @@
 
         <!-- View 2.5: Zones of Regulation -->
         <div id="zones-ui">
+            <!-- Empathetic line appears only when emotion is Sad or Upset -->
+            <p id="zone-ack-text" class="zone-ack">We’re here for you.</p>
+
             <h3>Which Zone are you in right now?</h3>
             <p>Select the colour that best matches how your body and feelings are.</p>
             <div class="zones-grid">
@@ -328,23 +335,21 @@
     <!-- QR Scanner library -->
     <script src="https://unpkg.com/html5-qrcode/html5-qrcode.min.js"></script>
 
-    <!-- Core Logic -->
     <script>
         // Store student data during the check-in process
         let studentId = null;
         let selectedEmotion = null;
         let selectedReason = null;
         let selectedZone = null;
-        let pendingTeacherModal = false; // whether we should show teacher modal before final submit
         let teacherCheckinRequested = 'No';
 
-        // Google Form config (ADD one new entry for Zones)
+        // Google Form config (with Zones entry)
         const formId = "1FAIpQLSeCikiFVOX1Skl9HWWfmzLFJn6_lI-QqO2nWas0m6Qp8-72aQ";
         const entry_studentId = "entry.38022795";
         const entry_wellbeingStatus = "entry.1222227123";
         const entry_reason = "entry.1498652664";
         const entry_teacherCheckin = "entry.1178975688";
-        const entry_zone = "entry.1234567890"; // TODO: Replace with your actual Google Form entry ID for "Zone"
+        const entry_zone = "entry.1234567890"; // TODO: replace with actual Google Form entry ID for Zone
 
         function showView(viewId) {
             document.querySelectorAll('.app-container > div').forEach(div => div.classList.remove('active'));
@@ -355,7 +360,6 @@
             studentId = decodedText;
             document.getElementById('welcome-message').innerText = 'Hello!';
             document.getElementById('student-id-display').innerText = studentId;
-            // Reset session state
             resetStateExceptScan();
             showView('checkin-ui');
         }
@@ -390,7 +394,16 @@
         // Step 1: Emotion
         function selectEmotion(emotion) {
             selectedEmotion = emotion;
-            // After choosing emotion, always ask for Zone of Regulation
+            // Show or hide the empathetic line on the Zones screen based on emotion
+            const ackEl = document.getElementById('zone-ack-text');
+            if (['Sad', 'Upset'].includes(selectedEmotion)) {
+                ackEl.textContent = "We’re here for you.";
+                ackEl.classList.add('visible');
+            } else {
+                ackEl.classList.remove('visible');
+                ackEl.textContent = "";
+            }
+            // Proceed to Zones
             showView('zones-ui');
         }
 
@@ -406,13 +419,11 @@
                 alert("Please choose your Zone before continuing.");
                 return;
             }
-            // If emotion is positive/neutral, skip reasons and teacher modal, submit immediately
             if (['Happy', 'Content', 'Neutral'].includes(selectedEmotion)) {
                 selectedReason = 'N/A';
                 teacherCheckinRequested = 'No';
                 submitFinalResponse();
             } else {
-                // For Sad/Upset, proceed to reasons first
                 showView('reasons-ui');
             }
         }
@@ -424,14 +435,12 @@
             element.classList.add('selected');
         }
 
-        // After selecting reason, show prominent teacher check-in modal
+        // After selecting reason, show teacher check-in modal
         function submitReasonThenAskTeacher() {
             if (!selectedReason) {
                 alert("Please select a reason before continuing.");
                 return;
             }
-            // Open modal
-            pendingTeacherModal = true;
             openTeacherModal();
         }
 
@@ -445,7 +454,6 @@
         function setTeacherCheckinAndSubmit(wantsCheckin) {
             teacherCheckinRequested = wantsCheckin ? 'Yes' : 'No';
             closeTeacherModal();
-            pendingTeacherModal = false;
             submitFinalResponse();
         }
 
@@ -491,9 +499,11 @@
             selectedReason = null;
             selectedZone = null;
             teacherCheckinRequested = 'No';
-            pendingTeacherModal = false;
             document.querySelectorAll('#reason-buttons-container .reason-button').forEach(btn => btn.classList.remove('selected'));
             document.querySelectorAll('#zones-ui .zone-card').forEach(card => card.classList.remove('selected'));
+            const ackEl = document.getElementById('zone-ack-text');
+            ackEl.classList.remove('visible');
+            ackEl.textContent = "";
             if (clearIdDisplay) {
                 document.getElementById('student-id-display').innerText = '';
             }
