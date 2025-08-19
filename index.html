@@ -1,541 +1,382 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>HeartBeat</title>
-    <style>
-        /* Google Font */
-        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap');
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HeartBeat</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap');
 
-        /* Base */
-        :root {
-            --bg: #f4f7f6;
-            --card: #ffffff;
-            --text: #4a4a4a;
-            --muted: #6c757d;
-            --primary-1: #007bff;
-            --primary-2: #0056b3;
-            --success-1: #28a745;
-            --success-2: #218838;
-            --secondary-1: #6c757d;
-            --secondary-2: #495057;
-        }
-        * { box-sizing: border-box; }
-        body {
-            font-family: 'Nunito', sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            text-align: center;
-            padding: 1rem;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-        }
-        .app-container {
-            background-color: var(--card);
-            width: 100%;
-            max-width: 420px;
-            padding: 2rem;
-            border-radius: 24px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-            transition: all 0.3s ease-in-out;
-        }
+    :root{
+      --bg:#f4f7f6; --card:#fff; --text:#4a4a4a; --muted:#6c757d;
+      --primary-1:#007bff; --primary-2:#0056b3;
+      --success-1:#28a745; --success-2:#218838;
+      --secondary-1:#6c757d; --secondary-2:#495057;
+      --sel-outline:#ffffff; --sel-ring:#111827; /* high contrast */
+    }
+    *{box-sizing:border-box}
+    body{
+      font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);
+      margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;
+      padding:1rem;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
+      text-align:center;
+    }
+    .app-container{
+      background:var(--card);width:100%;max-width:420px;padding:2rem;border-radius:24px;
+      box-shadow:0 10px 30px rgba(0,0,0,.08);transition:.3s;
+    }
 
-        /* Section visibility */
-        #scanner-container,
-        #checkin-ui,
-        #zones-ui,
-        #reasons-ui,
-        #teacher-checkin-modal,
-        #success-message { display: none; }
-        #scanner-container.active,
-        #checkin-ui.active,
-        #zones-ui.active,
-        #reasons-ui.active,
-        #teacher-checkin-modal.active,
-        #success-message.active { display: block; }
+    /* Visibility */
+    #scanner-container,#checkin-ui,#zones-ui,#reasons-ui,#teacher-checkin-modal,#success-message{display:none}
+    #scanner-container.active,#checkin-ui.active,#zones-ui.active,#reasons-ui.active,#teacher-checkin-modal.active,#success-message.active{display:block}
 
-        /* Headings and text */
-        h1, h2, h3 { color: var(--text); font-weight: 700; margin: 0.25rem 0; }
-        h1 { font-size: 1.8rem; }
-        h2 { font-size: 1.5rem; }
-        h3 { font-size: 1.2rem; }
-        p { color: var(--muted); font-size: 1.05rem; line-height: 1.6; margin: 0.5rem 0; }
+    h1,h2,h3{font-weight:700;margin:.25rem 0;color:var(--text)}
+    h1{font-size:1.8rem} h2{font-size:1.5rem} h3{font-size:1.2rem}
+    p{color:var(--muted);font-size:1.05rem;line-height:1.6;margin:.5rem 0}
 
-        /* Student ID display */
-        #student-id-display {
-            font-size: 0.9rem;
-            color: #9aa0a6;
-            margin-top: 16px;
-            margin-bottom: 0;
-            word-break: break-word;
-        }
+    #student-id-display{font-size:.9rem;color:#9aa0a6;margin-top:16px;word-break:break-word}
 
-        /* Scanner box */
-        #scanner {
-            width: 260px;
-            height: 260px;
-            border: 3px dashed #e0e0e0;
-            border-radius: 16px;
-            margin: 22px auto;
-            overflow: hidden;
-            background-color: #fafafa;
-        }
+    #scanner{
+      width:260px;height:260px;border:3px dashed #e0e0e0;border-radius:16px;margin:22px auto;
+      overflow:hidden;background:#fafafa;
+    }
 
-        /* Buttons */
-        .action-button {
-            font-family: 'Nunito', sans-serif;
-            font-weight: 700;
-            font-size: 1rem;
-            padding: 14px 28px;
-            border: none;
-            border-radius: 50px;
-            background: linear-gradient(45deg, var(--primary-1), var(--primary-2));
-            color: white;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0, 123, 255, 0.2);
-            margin-top: 20px;
-        }
-        .action-button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 7px 20px rgba(0, 123, 255, 0.3);
-        }
-        .action-button.submit {
-            background: linear-gradient(45deg, var(--success-1), var(--success-2));
-            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.2);
-        }
-        .action-button.secondary {
-            background: linear-gradient(45deg, var(--secondary-1), var(--secondary-2));
-            box-shadow: 0 4px 15px rgba(108,117,125,0.2);
-        }
+    .action-button{
+      font-family:'Nunito',sans-serif;font-weight:700;font-size:1rem;padding:14px 28px;border:none;border-radius:50px;
+      background:linear-gradient(45deg,var(--primary-1),var(--primary-2));color:#fff;cursor:pointer;transition:.3s;
+      box-shadow:0 4px 15px rgba(0,123,255,.2);margin-top:20px;
+    }
+    .action-button:hover{transform:translateY(-3px);box-shadow:0 7px 20px rgba(0,123,255,.3)}
+    .action-button.submit{background:linear-gradient(45deg,var(--success-1),var(--success-2));box-shadow:0 4px 15px rgba(40,167,69,.2)}
+    .action-button.secondary{background:linear-gradient(45deg,var(--secondary-1),var(--secondary-2));box-shadow:0 4px 15px rgba(108,117,125,.2)}
 
-        /* Emoji picker */
-        .emoji-options {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 20px;
-            margin-top: 1.5rem;
-            margin-bottom: 0;
-        }
-        .emoji-button {
-            font-size: 60px;
-            cursor: pointer;
-            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            display: inline-block;
-            user-select: none;
-        }
-        .emoji-button:hover { transform: scale(1.2); }
+    .emoji-options{display:flex;flex-wrap:wrap;justify-content:center;gap:20px;margin-top:1.5rem}
+    .emoji-button{font-size:60px;cursor:pointer;transition:transform .2s cubic-bezier(.175,.885,.32,1.275);display:inline-block;user-select:none}
+    .emoji-button:hover{transform:scale(1.2)}
 
-        /* Zones */
-        .zones-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 14px;
-            margin-top: 1.0rem;
-        }
-        .zone-card {
-            border-radius: 16px;
-            padding: 16px;
-            color: #fff;
-            font-weight: 700;
-            min-height: 96px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: transform 0.15s ease, box-shadow 0.15s ease;
-            box-shadow: 0 6px 16px rgba(0,0,0,0.08);
-            user-select: none;
-        }
-        .zone-card .zone-emoji { font-size: 28px; margin-bottom: 6px; }
-        .zone-card .zone-title { font-size: 1.05rem; }
-        .zone-card .zone-desc  { font-size: 0.85rem; font-weight: 600; opacity: 0.9; }
-        .zone-card:hover { transform: translateY(-2px); box-shadow: 0 10px 18px rgba(0,0,0,0.12); }
-        .zone-card.selected { outline: 3px solid rgba(255,255,255,0.9); box-shadow: 0 0 0 4px rgba(0,0,0,0.08) inset; }
-        .zone-blue  { background: #4aa3ff; }
-        .zone-green { background: #2bb673; }
-        .zone-yellow{ background: #f4b400; }
-        .zone-red   { background: #e84545; }
+    /* Zones */
+    .zones-grid{
+      display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:1rem;
+    }
+    .zone-card{
+      position:relative;border-radius:16px;padding:16px;color:#fff;font-weight:700;min-height:104px;
+      display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;
+      transition:transform .15s ease, box-shadow .15s ease, outline .15s ease; box-shadow:0 6px 16px rgba(0,0,0,.08);
+      user-select:none; outline:3px solid transparent;
+    }
+    .zone-card .zone-emoji{font-size:28px;margin-bottom:6px}
+    .zone-card .zone-title{font-size:1.05rem}
+    .zone-card .zone-desc{font-size:.85rem;font-weight:600;opacity:.95}
+    .zone-card:hover{transform:translateY(-2px);box-shadow:0 10px 18px rgba(0,0,0,.12)}
+    .zone-blue{background:#4aa3ff}
+    .zone-green{background:#2bb673}
+    .zone-yellow{background:#f4b400}
+    .zone-red{background:#e84545}
 
-        /* Reasons */
-        .reason-button {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            width: 100%;
-            margin: 12px auto;
-            padding: 16px;
-            font-size: 1rem;
-            font-family: 'Nunito', sans-serif;
-            font-weight: 700;
-            border: 2px solid #e0e0e0;
-            border-radius: 12px;
-            background-color: #f8f9fa;
-            color: #4a4a4a;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        .reason-button.selected {
-            background-color: #d4edda;
-            border-color: #28a745;
-            color: #155724;
-        }
-        .reason-button .emoji { font-size: 1.5rem; }
+    /* Strong visual selected state */
+    .zone-card.selected{
+      transform:translateY(-2px) scale(1.03);
+      outline:4px solid var(--sel-outline);
+      box-shadow:0 0 0 3px var(--sel-ring), 0 10px 20px rgba(0,0,0,.18);
+    }
+    .zone-card.selected::after{
+      content:"✓";
+      position:absolute;top:10px;right:10px;width:28px;height:28px;border-radius:50%;
+      background:rgba(255,255,255,.95);color:#111;font-weight:900;font-size:18px;display:flex;align-items:center;justify-content:center;
+      box-shadow:0 2px 6px rgba(0,0,0,.2);
+    }
+    .zone-card.selected::before{
+      /* subtle gloss overlay */
+      content:""; position:absolute; inset:0; border-radius:16px;
+      background:linear-gradient(180deg, rgba(255,255,255,.18), rgba(255,255,255,0) 40%);
+      pointer-events:none;
+    }
 
-        /* Teacher modal */
-        #teacher-checkin-modal {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.5);
-            padding: 16px;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-        }
-        #teacher-checkin-modal.active { display: flex; }
-        .modal-card {
-            width: 100%;
-            max-width: 420px;
-            background: #ffffff;
-            border-radius: 20px;
-            padding: 22px;
-            text-align: center;
-            box-shadow: 0 14px 40px rgba(0,0,0,0.2);
-            animation: pop 0.18s ease-out;
-        }
-        @keyframes pop {
-            from { transform: scale(0.96); opacity: 0; }
-            to   { transform: scale(1); opacity: 1; }
-        }
-        .modal-icon { font-size: 48px; margin-bottom: 10px; }
-        .modal-actions {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-            justify-content: center;
-            margin-top: 12px;
-        }
+    /* Reasons */
+    .reason-button{
+      display:flex;align-items:center;justify-content:center;gap:10px;width:100%;margin:12px auto;padding:16px;
+      font-size:1rem;font-family:'Nunito',sans-serif;font-weight:700;border:2px solid #e0e0e0;border-radius:12px;background:#f8f9fa;color:#4a4a4a;cursor:pointer;transition:.2s;
+    }
+    .reason-button.selected{background:#d4edda;border-color:#28a745;color:#155724}
+    .reason-button .emoji{font-size:1.5rem}
 
-        /* Success */
-        #success-message h2 { color: var(--success-1); font-size: 2rem; }
-        .success-emoji {
-            font-size: 6rem;
-            animation: bounce 0.8s ease-in-out;
-        }
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-15px); }
-        }
+    /* Modal */
+    #teacher-checkin-modal{position:fixed;inset:0;background:rgba(0,0,0,.5);padding:16px;display:none;align-items:center;justify-content:center;z-index:1000}
+    #teacher-checkin-modal.active{display:flex}
+    .modal-card{width:100%;max-width:420px;background:#fff;border-radius:20px;padding:22px;text-align:center;box-shadow:0 14px 40px rgba(0,0,0,.2);animation:pop .18s ease-out}
+    @keyframes pop{from{transform:scale(.96);opacity:0} to{transform:scale(1);opacity:1}}
+    .modal-icon{font-size:48px;margin-bottom:10px}
+    .modal-actions{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:12px}
 
-        /* Small empathetic banner on Zones screen (only for Sad/Upset) */
-        .zone-ack {
-            display: none;
-            margin: 0 0 8px 0;
-            color: #495057;
-            font-weight: 700;
-        }
-        .zone-ack.visible { display: block; }
+    /* Success */
+    #success-message h2{color:var(--success-1);font-size:2rem}
+    .success-emoji{font-size:6rem;animation:bounce .8s ease-in-out}
+    @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-15px)}}
 
-        /* Dynamic reasons heading */
-        #reasons-heading { margin-top: 0.25rem; }
-    </style>
+    #reasons-heading{margin-top:.25rem}
+  </style>
 </head>
 <body>
-
-    <div class="app-container">
-        <!-- View 1: QR Code Scanner -->
-        <div id="scanner-container">
-            <h1>HeartBeat</h1>
-            <h2>Wellbeing Check-in</h2>
-            <p>Please scan your code to begin.</p>
-            <div id="scanner"></div>
-            <button id="start-scan-btn" class="action-button">Start Scanning</button>
-        </div>
-
-        <!-- View 2: Emoji Selection -->
-        <div id="checkin-ui">
-            <h2 id="welcome-message"></h2>
-            <p>How are you feeling today?</p>
-            <div class="emoji-options">
-                <span class="emoji-button" onclick="selectEmotion('Upset','😭')" role="button" aria-label="Upset">😭</span>
-                <span class="emoji-button" onclick="selectEmotion('Sad','🙁')" role="button" aria-label="Sad">🙁</span>
-                <span class="emoji-button" onclick="selectEmotion('Neutral','😐')" role="button" aria-label="Neutral">😐</span>
-                <span class="emoji-button" onclick="selectEmotion('Content','🙂')" role="button" aria-label="Content">🙂</span>
-                <span class="emoji-button" onclick="selectEmotion('Happy','😊')" role="button" aria-label="Happy">😊</span>
-            </div>
-            <p id="student-id-display"></p>
-        </div>
-
-        <!-- View 2.5: Zones of Regulation -->
-        <div id="zones-ui">
-            <!-- Empathetic line appears only when emotion is Sad or Upset -->
-            <p id="zone-ack-text" class="zone-ack">We’re here for you.</p>
-
-            <h3>Which Zone are you in right now?</h3>
-            <p>Select the colour that best matches how your body and feelings are.</p>
-            <div class="zones-grid">
-                <div class="zone-card zone-blue" onclick="selectZone(this,'Blue')">
-                    <div class="zone-emoji">🥱</div>
-                    <div class="zone-title">Blue Zone</div>
-                    <div class="zone-desc">Low energy, sad, tired</div>
-                </div>
-                <div class="zone-card zone-green" onclick="selectZone(this,'Green')">
-                    <div class="zone-emoji">😊</div>
-                    <div class="zone-title">Green Zone</div>
-                    <div class="zone-desc">Calm, focused, ready to learn</div>
-                </div>
-                <div class="zone-card zone-yellow" onclick="selectZone(this,'Yellow')">
-                    <div class="zone-emoji">😬</div>
-                    <div class="zone-title">Yellow Zone</div>
-                    <div class="zone-desc">Worried, silly, wiggly</div>
-                </div>
-                <div class="zone-card zone-red" onclick="selectZone(this,'Red')">
-                    <div class="zone-emoji">😡</div>
-                    <div class="zone-title">Red Zone</div>
-                    <div class="zone-desc">Angry, out of control</div>
-                </div>
-            </div>
-            <button id="zones-continue-btn" class="action-button submit" onclick="continueAfterZone()">Continue</button>
-        </div>
-
-        <!-- View 3: Reasons -->
-        <div id="reasons-ui">
-            <h3 id="reasons-heading">I'm sorry to hear that.<br>What's on your mind?</h3>
-            <div id="reason-buttons-container">
-                <button class="reason-button" onclick="selectReason(this, 'Trouble with friends')"><span class="emoji">👥</span> Trouble with friends</button>
-                <button class="reason-button" onclick="selectReason(this, 'Hard schoolwork')"><span class="emoji">📚</span> Hard schoolwork</button>
-                <button class="reason-button" onclick="selectReason(this, 'Feeling unwell')"><span class="emoji">🤒</span> Feeling unwell</button>
-                <button class="reason-button" onclick="selectReason(this, 'Something at home')"><span class="emoji">🏠</span> Something at home</button>
-                <button class="reason-button" onclick="selectReason(this, 'I don\'t know')"><span class="emoji">🤷</span> I don't know</button>
-            </div>
-            <button id="final-submit-btn" class="action-button submit" onclick="submitReasonThenAskTeacher()">Next</button>
-        </div>
-
-        <!-- Prominent Teacher Check-in Modal -->
-        <div id="teacher-checkin-modal" role="dialog" aria-modal="true" aria-labelledby="teacher-checkin-title">
-            <div class="modal-card">
-                <div class="modal-icon">👩‍🏫</div>
-                <h3 id="teacher-checkin-title">Would you like a teacher to check in with you?</h3>
-                <p>Your teacher can speak with you privately to offer support.</p>
-                <div class="modal-actions">
-                    <button class="action-button submit" onclick="setTeacherCheckinAndSubmit(true)">Yes, please</button>
-                    <button class="action-button secondary" onclick="setTeacherCheckinAndSubmit(false)">No, thanks</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- View 4: Success Message -->
-        <div id="success-message">
-            <div class="success-emoji">👌</div>
-            <h2>Thank You!</h2>
-            <p>Your check-in has been recorded.</p>
-        </div>
+  <div class="app-container">
+    <!-- View 1: QR Code Scanner -->
+    <div id="scanner-container">
+      <h1>HeartBeat</h1>
+      <h2>Wellbeing Check-in</h2>
+      <p>Please scan your code to begin.</p>
+      <div id="scanner"></div>
+      <button id="start-scan-btn" class="action-button">Start Scanning</button>
     </div>
 
-    <!-- QR Scanner library -->
-    <script src="https://unpkg.com/html5-qrcode/html5-qrcode.min.js"></script>
+    <!-- View 2: Emoji Selection -->
+    <div id="checkin-ui">
+      <h2 id="welcome-message"></h2>
+      <p>How are you feeling today?</p>
+      <div class="emoji-options">
+        <span class="emoji-button" onclick="selectEmotion('Upset','😭')" role="button" aria-label="Upset">😭</span>
+        <span class="emoji-button" onclick="selectEmotion('Sad','🙁')" role="button" aria-label="Sad">🙁</span>
+        <span class="emoji-button" onclick="selectEmotion('Neutral','😐')" role="button" aria-label="Neutral">😐</span>
+        <span class="emoji-button" onclick="selectEmotion('Content','🙂')" role="button" aria-label="Content">🙂</span>
+        <span class="emoji-button" onclick="selectEmotion('Happy','😊')" role="button" aria-label="Happy">😊</span>
+      </div>
+      <p id="student-id-display"></p>
+    </div>
 
-    <!-- Core Logic -->
-    <script>
-        // State
-        let studentId = null;
-        let selectedEmotion = null;      // 'Upset' | 'Sad' | 'Neutral' | 'Content' | 'Happy'
-        let selectedEmotionEmoji = '';   // '😭' | '🙁' | '😐' | '🙂' | '😊'
-        let selectedReason = null;
-        let selectedZone = null;
-        let teacherCheckinRequested = 'No';
+    <!-- View 2.5: Zones of Regulation -->
+    <div id="zones-ui">
+      <h3>Which Zone are you in right now?</h3>
+      <p>Select the colour that best matches how your body and feelings are.</p>
+      <div class="zones-grid">
+        <button class="zone-card zone-blue" onclick="selectZone(this,'Blue')" aria-pressed="false" aria-label="Blue Zone">
+          <div class="zone-emoji">🥱</div>
+          <div class="zone-title">Blue Zone</div>
+          <div class="zone-desc">Low energy, sad, tired</div>
+        </button>
+        <button class="zone-card zone-green" onclick="selectZone(this,'Green')" aria-pressed="false" aria-label="Green Zone">
+          <div class="zone-emoji">😊</div>
+          <div class="zone-title">Green Zone</div>
+          <div class="zone-desc">Calm, focused, ready to learn</div>
+        </button>
+        <button class="zone-card zone-yellow" onclick="selectZone(this,'Yellow')" aria-pressed="false" aria-label="Yellow Zone">
+          <div class="zone-emoji">😬</div>
+          <div class="zone-title">Yellow Zone</div>
+          <div class="zone-desc">Worried, silly, wiggly</div>
+        </button>
+        <button class="zone-card zone-red" onclick="selectZone(this,'Red')" aria-pressed="false" aria-label="Red Zone">
+          <div class="zone-emoji">😡</div>
+          <div class="zone-title">Red Zone</div>
+          <div class="zone-desc">Angry, out of control</div>
+        </button>
+      </div>
+      <button id="zones-continue-btn" class="action-button submit" onclick="continueAfterZone()">Continue</button>
+    </div>
 
-        // Google Form config
-        const formId = "1FAIpQLSeCikiFVOX1Skl9HWWfmzLFJn6_lI-QqO2nWas0m6Qp8-72aQ";
-        const entry_studentId = "entry.38022795";
-        const entry_wellbeingStatus = "entry.1222227123";
-        const entry_reason = "entry.1498652664";
-        const entry_teacherCheckin = "entry.1178975688";
-        const entry_zone = "entry.1234567890"; // TODO: replace with your actual Google Form entry ID for Zone
+    <!-- View 3: Reasons -->
+    <div id="reasons-ui">
+      <h3 id="reasons-heading">I'm sorry to hear that.<br>What's on your mind?</h3>
+      <div id="reason-buttons-container">
+        <button class="reason-button" onclick="selectReason(this, 'Trouble with friends')"><span class="emoji">👥</span> Trouble with friends</button>
+        <button class="reason-button" onclick="selectReason(this, 'Hard schoolwork')"><span class="emoji">📚</span> Hard schoolwork</button>
+        <button class="reason-button" onclick="selectReason(this, 'Feeling unwell')"><span class="emoji">🤒</span> Feeling unwell</button>
+        <button class="reason-button" onclick="selectReason(this, 'Something at home')"><span class="emoji">🏠</span> Something at home</button>
+        <button class="reason-button" onclick="selectReason(this, 'I don\'t know')"><span class="emoji">🤷</span> I don't know</button>
+      </div>
+      <button id="final-submit-btn" class="action-button submit" onclick="submitReasonThenAskTeacher()">Next</button>
+    </div>
 
-        // Helpers
-        function showView(id) {
-            document.querySelectorAll('.app-container > div').forEach(div => div.classList.remove('active'));
-            document.getElementById(id)?.classList.add('active');
+    <!-- Teacher Check-in Modal -->
+    <div id="teacher-checkin-modal" role="dialog" aria-modal="true" aria-labelledby="teacher-checkin-title">
+      <div class="modal-card">
+        <div class="modal-icon">👩‍🏫</div>
+        <h3 id="teacher-checkin-title">Would you like a teacher to check in with you?</h3>
+        <p>Your teacher can speak with you privately to offer support.</p>
+        <div class="modal-actions">
+          <button class="action-button submit" onclick="setTeacherCheckinAndSubmit(true)">Yes, please</button>
+          <button class="action-button secondary" onclick="setTeacherCheckinAndSubmit(false)">No, thanks</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- View 4: Success -->
+    <div id="success-message">
+      <div class="success-emoji">👌</div>
+      <h2>Thank You!</h2>
+      <p>Your check-in has been recorded.</p>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/html5-qrcode/html5-qrcode.min.js"></script>
+  <script>
+    // State
+    let studentId = null;
+    let selectedEmotion = null;
+    let selectedEmotionEmoji = '';
+    let selectedReason = null;
+    let selectedZone = null;
+    let teacherCheckinRequested = 'No';
+
+    // Google Form config (replace with your actual entry IDs)
+    const formId = "1FAIpQLSeCikiFVOX1Skl9HWWfmzLFJn6_lI-QqO2nWas0m6Qp8-72aQ";
+    const entry_studentId = "entry.38022795";
+    const entry_wellbeingStatus = "entry.1222227123";
+    const entry_reason = "entry.1498652664";
+    const entry_teacherCheckin = "entry.1178975688";
+    const entry_zone = "entry.1234567890"; // TODO: replace with your actual Google Form entry ID for Zone
+
+    // Helpers
+    function showView(id){
+      document.querySelectorAll('.app-container > div').forEach(div=>div.classList.remove('active'));
+      document.getElementById(id)?.classList.add('active');
+    }
+
+    function handleSuccessfulScan(decodedText){
+      studentId = decodedText;
+      document.getElementById('welcome-message').innerText = 'Hello!';
+      document.getElementById('student-id-display').innerText = studentId;
+      resetStateExceptScan();
+      showView('checkin-ui');
+    }
+
+    // Start scanner
+    const startScanBtn = document.getElementById('start-scan-btn');
+    startScanBtn.addEventListener('click', ()=>{
+      startScanBtn.style.display='none';
+      const html5QrCode = new Html5Qrcode("scanner");
+      const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+      const onSuccess = (decodedText)=>{
+        if (html5QrCode && html5QrCode.isScanning) {
+          html5QrCode.stop().then(()=>handleSuccessfulScan(decodedText))
+            .catch(()=>handleSuccessfulScan(decodedText));
         }
-
-        function handleSuccessfulScan(decodedText) {
-            studentId = decodedText;
-            document.getElementById('welcome-message').innerText = 'Hello!';
-            document.getElementById('student-id-display').innerText = studentId;
-            resetStateExceptScan();
-            showView('checkin-ui');
-        }
-
-        // Start scanner
-        const startScanBtn = document.getElementById('start-scan-btn');
-        startScanBtn.addEventListener('click', () => {
-            startScanBtn.style.display = 'none';
-            const html5QrCode = new Html5Qrcode("scanner");
-            const config = { fps: 10, qrbox: { width: 250, height: 250 } };
-            const onSuccess = (decodedText) => {
-                if (html5QrCode && html5QrCode.isScanning) {
-                    html5QrCode.stop().then(() => handleSuccessfulScan(decodedText))
-                        .catch(() => handleSuccessfulScan(decodedText));
-                }
-            };
-            html5QrCode.start({ facingMode: "environment" }, config, onSuccess)
-                .catch(() => {
-                    html5QrCode.start({}, config, onSuccess)
-                        .catch(err => {
-                            alert("Could not start QR scanner. Please ensure camera permissions are enabled for this site.");
-                            console.error("Failed to start scanner", err);
-                            startScanBtn.style.display = 'inline-block';
-                        });
-                });
+      };
+      html5QrCode.start({ facingMode: "environment" }, config, onSuccess)
+        .catch(()=>{
+          html5QrCode.start({}, config, onSuccess)
+            .catch(err=>{
+              alert("Could not start QR scanner. Please ensure camera permissions are enabled for this site.");
+              console.error("Failed to start scanner", err);
+              startScanBtn.style.display='inline-block';
+            });
         });
+    });
 
-        // Step 1: Emotion (primary branching control)
-        function selectEmotion(emotion, emoji) {
-            selectedEmotion = emotion;
-            selectedEmotionEmoji = emoji || '';
-            // Zones banner shows only for Sad/Upset
-            const ackEl = document.getElementById('zone-ack-text');
-            if (['Sad', 'Upset'].includes(selectedEmotion)) {
-                ackEl.textContent = "We’re here for you.";
-                ackEl.classList.add('visible');
-            } else {
-                ackEl.classList.remove('visible');
-                ackEl.textContent = "";
-            }
-            // Proceed to Zones
-            showView('zones-ui');
-        }
+    // Step 1: Emotion
+    function selectEmotion(emotion, emoji){
+      selectedEmotion = emotion;
+      selectedEmotionEmoji = emoji || '';
+      showView('zones-ui');
+    }
 
-        // Step 2: Zone (informational only; does not affect follow-up)
-        function selectZone(el, zone) {
-            selectedZone = zone;
-            document.querySelectorAll('#zones-ui .zone-card').forEach(card => card.classList.remove('selected'));
-            el.classList.add('selected');
-        }
+    // Step 2: Zone (informational only)
+    function selectZone(el, zone){
+      selectedZone = zone;
+      document.querySelectorAll('#zones-ui .zone-card').forEach(card=>{
+        card.classList.remove('selected');
+        card.setAttribute('aria-pressed','false');
+      });
+      el.classList.add('selected');
+      el.setAttribute('aria-pressed','true');
+    }
 
-        function continueAfterZone() {
-            if (!selectedZone) {
-                alert("Please choose your Zone before continuing.");
-                return;
-            }
-            // Follow-up ONLY if initial emotion is Sad or Upset
-            if (['Sad', 'Upset'].includes(selectedEmotion)) {
-                // Set personalized reasons heading
-                const reasonsHeading = document.getElementById('reasons-heading');
-                const label = selectedEmotion; // "Sad" or "Upset"
-                const emoji = selectedEmotionEmoji || '';
-                reasonsHeading.innerHTML = `You chose ‘${emoji} ${label}’.<br>Why do you feel that way?`;
-                showView('reasons-ui');
-            } else {
-                // Neutral/Content/Happy → skip reasons and teacher modal, submit now
-                selectedReason = 'N/A';
-                teacherCheckinRequested = 'No';
-                submitFinalResponse();
-            }
-        }
+    function continueAfterZone(){
+      if (!selectedZone){
+        alert("Please choose your Zone before continuing.");
+        return;
+      }
+      if (['Sad','Upset'].includes(selectedEmotion)){
+        const reasonsHeading = document.getElementById('reasons-heading');
+        const label = selectedEmotion;
+        const emoji = selectedEmotionEmoji || '';
+        reasonsHeading.innerHTML = `You chose ‘${emoji} ${label}’.<br>Why do you feel that way?`;
+        showView('reasons-ui');
+      } else {
+        selectedReason = 'N/A';
+        teacherCheckinRequested = 'No';
+        submitFinalResponse();
+      }
+    }
 
-        // Step 3: Reason
-        function selectReason(element, reason) {
-            selectedReason = reason;
-            document.querySelectorAll('#reason-buttons-container .reason-button').forEach(btn => btn.classList.remove('selected'));
-            element.classList.add('selected');
-        }
+    // Step 3: Reason
+    function selectReason(element, reason){
+      selectedReason = reason;
+      document.querySelectorAll('#reason-buttons-container .reason-button').forEach(btn=>btn.classList.remove('selected'));
+      element.classList.add('selected');
+    }
 
-        // After selecting reason, ask for teacher check-in
-        function submitReasonThenAskTeacher() {
-            if (!selectedReason) {
-                alert("Please select a reason before continuing.");
-                return;
-            }
-            openTeacherModal();
-        }
+    function submitReasonThenAskTeacher(){
+      if (!selectedReason){
+        alert("Please select a reason before continuing.");
+        return;
+      }
+      openTeacherModal();
+    }
 
-        function openTeacherModal() {
-            document.getElementById('teacher-checkin-modal').classList.add('active');
-        }
-        function closeTeacherModal() {
-            document.getElementById('teacher-checkin-modal').classList.remove('active');
-        }
-        function setTeacherCheckinAndSubmit(wantsCheckin) {
-            teacherCheckinRequested = wantsCheckin ? 'Yes' : 'No';
-            closeTeacherModal();
-            submitFinalResponse();
-        }
+    function openTeacherModal(){ document.getElementById('teacher-checkin-modal').classList.add('active'); }
+    function closeTeacherModal(){ document.getElementById('teacher-checkin-modal').classList.remove('active'); }
+    function setTeacherCheckinAndSubmit(wantsCheckin){
+      teacherCheckinRequested = wantsCheckin ? 'Yes' : 'No';
+      closeTeacherModal();
+      submitFinalResponse();
+    }
 
-        // Final submission
-        async function submitFinalResponse() {
-            if (!studentId || !selectedEmotion || !selectedZone) {
-                alert("Something went wrong. Please scan your code again.");
-                showView('scanner-container');
-                return;
-            }
-            if ((['Sad', 'Upset'].includes(selectedEmotion)) && !selectedReason) {
-                alert("Please select a reason before submitting.");
-                showView('reasons-ui');
-                return;
-            }
+    // Final submission
+    async function submitFinalResponse(){
+      if (!studentId || !selectedEmotion || !selectedZone){
+        alert("Something went wrong. Please scan your code again.");
+        showView('scanner-container');
+        return;
+      }
+      if ((['Sad','Upset'].includes(selectedEmotion)) && !selectedReason){
+        alert("Please select a reason before submitting.");
+        showView('reasons-ui');
+        return;
+      }
 
-            const params = new URLSearchParams();
-            params.append(entry_studentId, studentId);
-            params.append(entry_wellbeingStatus, selectedEmotion);
-            params.append(entry_reason, selectedReason || 'N/A');
-            params.append(entry_teacherCheckin, teacherCheckinRequested || 'No');
-            params.append(entry_zone, selectedZone);
+      const params = new URLSearchParams();
+      params.append(entry_studentId, studentId);
+      params.append(entry_wellbeingStatus, selectedEmotion);
+      params.append(entry_reason, selectedReason || 'N/A');
+      params.append(entry_teacherCheckin, teacherCheckinRequested || 'No');
+      params.append(entry_zone, selectedZone);
 
-            const submitUrl = `https://docs.google.com/forms/d/e/${formId}/formResponse?` + params.toString();
+      const submitUrl = `https://docs.google.com/forms/d/e/${formId}/formResponse?` + params.toString();
 
-            try {
-                await fetch(submitUrl, { method: 'POST', mode: 'no-cors' });
-                showView('success-message');
-            } catch (error) {
-                console.error('Error submitting form:', error);
-                alert('There was an error saving your check-in. Please try again.');
-            }
+      try{
+        await fetch(submitUrl, { method:'POST', mode:'no-cors' });
+        showView('success-message');
+      }catch(err){
+        console.error('Error submitting form:', err);
+        alert('There was an error saving your check-in. Please try again.');
+      }
 
-            setTimeout(() => {
-                showView('scanner-container');
-                startScanBtn.style.display = 'inline-block';
-                resetStateExceptScan(true);
-            }, 4000);
-        }
+      setTimeout(()=>{
+        showView('scanner-container');
+        startScanBtn.style.display='inline-block';
+        resetStateExceptScan(true);
+      }, 4000);
+    }
 
-        function resetStateExceptScan(clearIdDisplay = false) {
-            selectedEmotion = null;
-            selectedEmotionEmoji = '';
-            selectedReason = null;
-            selectedZone = null;
-            teacherCheckinRequested = 'No';
+    function resetStateExceptScan(clearIdDisplay=false){
+      selectedEmotion = null;
+      selectedEmotionEmoji = '';
+      selectedReason = null;
+      selectedZone = null;
+      teacherCheckinRequested = 'No';
 
-            // Clear UI selections
-            document.querySelectorAll('#reason-buttons-container .reason-button').forEach(btn => btn.classList.remove('selected'));
-            document.querySelectorAll('#zones-ui .zone-card').forEach(card => card.classList.remove('selected'));
-            const ackEl = document.getElementById('zone-ack-text');
-            ackEl.classList.remove('visible');
-            ackEl.textContent = "";
+      document.querySelectorAll('#reason-buttons-container .reason-button').forEach(btn=>btn.classList.remove('selected'));
+      document.querySelectorAll('#zones-ui .zone-card').forEach(card=>{
+        card.classList.remove('selected');
+        card.setAttribute('aria-pressed','false');
+      });
 
-            // Reset reasons heading to a default (will be overwritten dynamically when needed)
-            const reasonsHeading = document.getElementById('reasons-heading');
-            reasonsHeading.innerHTML = "I'm sorry to hear that.<br>What's on your mind?";
+      const reasonsHeading = document.getElementById('reasons-heading');
+      reasonsHeading.innerHTML = "I'm sorry to hear that.<br>What's on your mind?";
 
-            if (clearIdDisplay) {
-                document.getElementById('student-id-display').innerText = '';
-            }
-        }
+      if (clearIdDisplay){
+        document.getElementById('student-id-display').innerText = '';
+      }
+    }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            showView('scanner-container');
-        });
-    </script>
+    document.addEventListener('DOMContentLoaded', ()=>{ showView('scanner-container'); });
+  </script>
 </body>
 </html>
