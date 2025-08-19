@@ -37,14 +37,18 @@
         /* --- UI Section Visibility --- */
         #scanner-container,
         #checkin-ui,
+        #zones-ui,
         #reasons-ui,
+        #teacher-checkin-modal,
         #success-message {
             display: none; /* All sections are hidden by default */
         }
         
         #scanner-container.active,
         #checkin-ui.active,
+        #zones-ui.active,
         #reasons-ui.active,
+        #teacher-checkin-modal.active,
         #success-message.active {
             display: block; /* The "active" section is shown */
         }
@@ -55,31 +59,22 @@
             font-weight: 700;
         }
 
-        h1 {
-            font-size: 1.8rem;
-        }
-
-        h2 {
-            font-size: 1.5rem;
-        }
-
-        p {
-            color: #6c757d;
-            font-size: 1.1rem;
-            line-height: 1.6;
-        }
+        h1 { font-size: 1.8rem; }
+        h2 { font-size: 1.5rem; }
+        p  { color: #6c757d; font-size: 1.1rem; line-height: 1.6; }
         
-        /* UPDATED: Style for the Student ID display */
+        /* Student ID display */
         #student-id-display {
             font-size: 0.9rem;
             color: #aaa;
-            margin-top: 20px; /* Provides space below emojis */
+            margin-top: 20px;
             margin-bottom: 0;
+            word-break: break-word;
         }
 
         #scanner {
             width: 250px;
-            height: 250px; /* Give scanner a defined size */
+            height: 250px;
             border: 3px dashed #e0e0e0;
             border-radius: 16px;
             margin: 25px auto;
@@ -87,7 +82,7 @@
             background-color: #fafafa;
         }
         
-        /* General purpose button styling */
+        /* Buttons */
         .action-button {
              font-family: 'Nunito', sans-serif;
              font-weight: 700;
@@ -102,39 +97,70 @@
              box-shadow: 0 4px 15px rgba(0, 123, 255, 0.2);
              margin-top: 20px;
         }
-
         .action-button:hover {
             transform: translateY(-3px);
             box-shadow: 0 7px 20px rgba(0, 123, 255, 0.3);
         }
-        
         .action-button.submit {
             background: linear-gradient(45deg, #28a745, #218838);
-             box-shadow: 0 4px 15px rgba(40, 167, 69, 0.2);
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.2);
+        }
+        .action-button.secondary {
+            background: linear-gradient(45deg, #6c757d, #495057);
+            box-shadow: 0 4px 15px rgba(108,117,125,0.2);
         }
 
-        /* UPDATED: Flexbox layout for emoji options */
+        /* Emojis */
         .emoji-options {
             display: flex;
-            flex-wrap: wrap; /* Allows emojis to wrap to the next line */
-            justify-content: center; /* Centers the emojis */
-            gap: 20px; /* Provides consistent spacing */
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
             margin-top: 2rem;
             margin-bottom: 0;
         }
-
         .emoji-button {
-            font-size: 60px; /* Slightly reduced for better wrapping */
+            font-size: 60px;
             cursor: pointer;
             transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             display: inline-block;
         }
+        .emoji-button:hover { transform: scale(1.3); }
 
-        .emoji-button:hover {
-            transform: scale(1.3);
+        /* Zones of Regulation (visual choice) */
+        .zones-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin-top: 1.25rem;
         }
-        
-        /* Styling for the list of reasons */
+        .zone-card {
+            border-radius: 16px;
+            padding: 16px;
+            color: #fff;
+            font-weight: 700;
+            min-height: 96px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+            user-select: none;
+        }
+        .zone-card .zone-emoji { font-size: 28px; margin-bottom: 6px; }
+        .zone-card .zone-title { font-size: 1.05rem; }
+        .zone-card .zone-desc  { font-size: 0.85rem; font-weight: 600; opacity: 0.9; }
+        .zone-card:hover { transform: translateY(-2px); box-shadow: 0 10px 18px rgba(0,0,0,0.12); }
+        .zone-card.selected { outline: 3px solid rgba(255,255,255,0.9); box-shadow: 0 0 0 4px rgba(0,0,0,0.08) inset; }
+
+        .zone-blue  { background: #4aa3ff; }
+        .zone-green { background: #2bb673; }
+        .zone-yellow{ background: #f4b400; }
+        .zone-red   { background: #e84545; }
+
+        /* Reasons */
         .reason-button {
             display: flex; 
             align-items: center; 
@@ -153,52 +179,57 @@
             cursor: pointer;
             transition: all 0.2s ease;
         }
-
         .reason-button.selected {
-            background-color: #d4edda; /* Light green to show selection */
+            background-color: #d4edda;
             border-color: #28a745;
             color: #155724;
         }
-        
-        .reason-button .emoji {
-            font-size: 1.5rem;
-        }
+        .reason-button .emoji { font-size: 1.5rem; }
 
-        /* Teacher check-in request styling */
-        #teacher-checkin {
-            margin-top: 25px;
+        /* Teacher Check-in Modal (prominent option box) */
+        #teacher-checkin-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
             padding: 16px;
-            background-color: #fff9e6;
-            border-radius: 12px;
-            display: flex;
+            display: none;
             align-items: center;
             justify-content: center;
+            z-index: 1000;
+        }
+        #teacher-checkin-modal.active { display: flex; }
+        .modal-card {
+            width: 100%;
+            max-width: 420px;
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 22px;
+            text-align: center;
+            box-shadow: 0 14px 40px rgba(0,0,0,0.2);
+            animation: pop 0.18s ease-out;
+        }
+        @keyframes pop {
+            from { transform: scale(0.96); opacity: 0; }
+            to   { transform: scale(1); opacity: 1; }
+        }
+        .modal-icon { font-size: 48px; margin-bottom: 10px; }
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 12px;
         }
 
-        #teacher-checkin label {
-             cursor: pointer; 
-             margin-left: 8px; 
-             display: flex;
-             align-items: center;
-             gap: 10px;
-        }
-
-        #request-checkin-checkbox {
-            width: 22px;
-            height: 22px;
-            accent-color: #007bff;
-        }
-        
+        /* Success */
         #success-message h2 {
             color: #28a745;
             font-size: 2rem;
         }
-
         .success-emoji {
             font-size: 6rem;
             animation: bounce 0.8s ease-in-out;
         }
-
         @keyframes bounce {
             0%, 100% { transform: translateY(0); }
             50% { transform: translateY(-15px); }
@@ -228,11 +259,39 @@
                 <span class="emoji-button" onclick="selectEmotion('Content')" role="button" aria-label="Content">🙂</span>
                 <span class="emoji-button" onclick="selectEmotion('Happy')" role="button" aria-label="Happy">😊</span>
             </div>
-            <!-- UPDATED: Element to display the student's ID moved to below the emojis -->
             <p id="student-id-display"></p>
         </div>
 
-        <!-- View 3: Reasons & Teacher Check-in -->
+        <!-- View 2.5: Zones of Regulation -->
+        <div id="zones-ui">
+            <h3>Which Zone are you in right now?</h3>
+            <p>Select the colour that best matches how your body and feelings are.</p>
+            <div class="zones-grid">
+                <div class="zone-card zone-blue" onclick="selectZone(this,'Blue')">
+                    <div class="zone-emoji">🥱</div>
+                    <div class="zone-title">Blue Zone</div>
+                    <div class="zone-desc">Low energy, sad, tired</div>
+                </div>
+                <div class="zone-card zone-green" onclick="selectZone(this,'Green')">
+                    <div class="zone-emoji">😊</div>
+                    <div class="zone-title">Green Zone</div>
+                    <div class="zone-desc">Calm, focused, ready to learn</div>
+                </div>
+                <div class="zone-card zone-yellow" onclick="selectZone(this,'Yellow')">
+                    <div class="zone-emoji">😬</div>
+                    <div class="zone-title">Yellow Zone</div>
+                    <div class="zone-desc">Worried, silly, wiggly</div>
+                </div>
+                <div class="zone-card zone-red" onclick="selectZone(this,'Red')">
+                    <div class="zone-emoji">😡</div>
+                    <div class="zone-title">Red Zone</div>
+                    <div class="zone-desc">Angry, out of control</div>
+                </div>
+            </div>
+            <button id="zones-continue-btn" class="action-button submit" onclick="continueAfterZone()">Continue</button>
+        </div>
+
+        <!-- View 3: Reasons -->
         <div id="reasons-ui">
             <h3>I'm sorry to hear that.<br>What's on your mind?</h3>
             <div id="reason-buttons-container">
@@ -242,30 +301,50 @@
                 <button class="reason-button" onclick="selectReason(this, 'Something at home')"><span class="emoji">🏠</span> Something at home</button>
                 <button class="reason-button" onclick="selectReason(this, 'I don\'t know')"><span class="emoji">🤷</span> I don't know</button>
             </div>
-            <div id="teacher-checkin">
-                <input type="checkbox" id="request-checkin-checkbox">
-                <label for="request-checkin-checkbox"><span class="emoji">👩‍🏫</span> Ask a teacher to check in with me.</label>
+            <button id="final-submit-btn" class="action-button submit" onclick="submitReasonThenAskTeacher()">Next</button>
+        </div>
+
+        <!-- Prominent Teacher Check-in Modal -->
+        <div id="teacher-checkin-modal" role="dialog" aria-modal="true" aria-labelledby="teacher-checkin-title">
+            <div class="modal-card">
+                <div class="modal-icon">👩‍🏫</div>
+                <h3 id="teacher-checkin-title">Would you like a teacher to check in with you?</h3>
+                <p>Your teacher can speak with you privately to offer support.</p>
+                <div class="modal-actions">
+                    <button class="action-button submit" onclick="setTeacherCheckinAndSubmit(true)">Yes, please</button>
+                    <button class="action-button secondary" onclick="setTeacherCheckinAndSubmit(false)">No, thanks</button>
+                </div>
             </div>
-            <button id="final-submit-btn" class="action-button submit" onclick="submitFinalResponse()">Submit Check-in</button>
         </div>
 
         <!-- View 4: Success Message -->
         <div id="success-message">
-            <div class="success-emoji">👍</div>
+            <div class="success-emoji">👌</div>
             <h2>Thank You!</h2>
             <p>Your check-in has been recorded.</p>
         </div>
     </div>
     
-    <!-- This library is required for the real QR scanner to work -->
+    <!-- QR Scanner library -->
     <script src="https://unpkg.com/html5-qrcode/html5-qrcode.min.js"></script>
 
-    <!-- The App's Core JavaScript Logic -->
+    <!-- Core Logic -->
     <script>
         // Store student data during the check-in process
         let studentId = null;
         let selectedEmotion = null;
         let selectedReason = null;
+        let selectedZone = null;
+        let pendingTeacherModal = false; // whether we should show teacher modal before final submit
+        let teacherCheckinRequested = 'No';
+
+        // Google Form config (ADD one new entry for Zones)
+        const formId = "1FAIpQLSeCikiFVOX1Skl9HWWfmzLFJn6_lI-QqO2nWas0m6Qp8-72aQ";
+        const entry_studentId = "entry.38022795";
+        const entry_wellbeingStatus = "entry.1222227123";
+        const entry_reason = "entry.1498652664";
+        const entry_teacherCheckin = "entry.1178975688";
+        const entry_zone = "entry.1234567890"; // TODO: Replace with your actual Google Form entry ID for "Zone"
 
         function showView(viewId) {
             document.querySelectorAll('.app-container > div').forEach(div => div.classList.remove('active'));
@@ -275,8 +354,9 @@
         function handleSuccessfulScan(decodedText, decodedResult) {
             studentId = decodedText;
             document.getElementById('welcome-message').innerText = 'Hello!';
-            // UPDATED: Display the scanned ID for verification without the "ID: " prefix
             document.getElementById('student-id-display').innerText = studentId;
+            // Reset session state
+            resetStateExceptScan();
             showView('checkin-ui');
         }
 
@@ -298,7 +378,7 @@
             html5QrCode.start({ facingMode: "environment" }, config, qrCodeSuccessCallback)
                 .catch(err => {
                     console.log("Rear camera failed, trying any available camera...", err);
-                    html5QrCode.start({ }, config, qrCodeSuccessCallback)
+                    html5QrCode.start({}, config, qrCodeSuccessCallback)
                         .catch(err => {
                             alert("Could not start QR scanner. Please ensure camera permissions are enabled for this site.");
                             console.error("Failed to start scanner", err);
@@ -307,46 +387,89 @@
                 });
         });
         
+        // Step 1: Emotion
         function selectEmotion(emotion) {
             selectedEmotion = emotion;
-            if (['Happy', 'Content', 'Neutral'].includes(emotion)) {
+            // After choosing emotion, always ask for Zone of Regulation
+            showView('zones-ui');
+        }
+
+        // Step 2: Zone of Regulation
+        function selectZone(element, zone) {
+            selectedZone = zone;
+            document.querySelectorAll('#zones-ui .zone-card').forEach(card => card.classList.remove('selected'));
+            element.classList.add('selected');
+        }
+
+        function continueAfterZone() {
+            if (!selectedZone) {
+                alert("Please choose your Zone before continuing.");
+                return;
+            }
+            // If emotion is positive/neutral, skip reasons and teacher modal, submit immediately
+            if (['Happy', 'Content', 'Neutral'].includes(selectedEmotion)) {
                 selectedReason = 'N/A';
+                teacherCheckinRequested = 'No';
                 submitFinalResponse();
             } else {
+                // For Sad/Upset, proceed to reasons first
                 showView('reasons-ui');
             }
         }
 
+        // Step 3: Reason (for low wellbeing)
         function selectReason(element, reason) {
             selectedReason = reason;
             document.querySelectorAll('#reason-buttons-container .reason-button').forEach(btn => btn.classList.remove('selected'));
             element.classList.add('selected');
         }
 
-        async function submitFinalResponse() {
-            if ((['Sad', 'Upset'].includes(selectedEmotion)) && !selectedReason) {
-                alert("Please select a reason before submitting.");
+        // After selecting reason, show prominent teacher check-in modal
+        function submitReasonThenAskTeacher() {
+            if (!selectedReason) {
+                alert("Please select a reason before continuing.");
                 return;
             }
-            if (!studentId || !selectedEmotion) {
+            // Open modal
+            pendingTeacherModal = true;
+            openTeacherModal();
+        }
+
+        function openTeacherModal() {
+            document.getElementById('teacher-checkin-modal').classList.add('active');
+        }
+        function closeTeacherModal() {
+            document.getElementById('teacher-checkin-modal').classList.remove('active');
+        }
+
+        function setTeacherCheckinAndSubmit(wantsCheckin) {
+            teacherCheckinRequested = wantsCheckin ? 'Yes' : 'No';
+            closeTeacherModal();
+            pendingTeacherModal = false;
+            submitFinalResponse();
+        }
+
+        // Final submission
+        async function submitFinalResponse() {
+            if (!studentId || !selectedEmotion || !selectedZone) {
                 alert("Something went wrong. Please scan your code again.");
                 showView('scanner-container');
                 return;
             }
+            if ((['Sad', 'Upset'].includes(selectedEmotion)) && !selectedReason) {
+                alert("Please select a reason before submitting.");
+                showView('reasons-ui');
+                return;
+            }
 
-            const teacherCheckinRequested = document.getElementById('request-checkin-checkbox').checked ? 'Yes' : 'No';
-            
-            const formId = "1FAIpQLSeCikiFVOX1Skl9HWWfmzLFJn6_lI-QqO2nWas0m6Qp8-72aQ";
-            const entry_studentId = "entry.38022795";
-            const entry_wellbeingStatus = "entry.1222227123";
-            const entry_reason = "entry.1498652664";
-            const entry_teacherCheckin = "entry.1178975688";
+            const params = new URLSearchParams();
+            params.append(entry_studentId, studentId);
+            params.append(entry_wellbeingStatus, selectedEmotion);
+            params.append(entry_reason, selectedReason || 'N/A');
+            params.append(entry_teacherCheckin, teacherCheckinRequested || 'No');
+            params.append(entry_zone, selectedZone);
 
-            const submitUrl = `https://docs.google.com/forms/d/e/${formId}/formResponse?` +
-                              `${entry_studentId}=${encodeURIComponent(studentId)}&` +
-                              `${entry_wellbeingStatus}=${encodeURIComponent(selectedEmotion)}&` +
-                              `${entry_reason}=${encodeURIComponent(selectedReason)}&` +
-                              `${entry_teacherCheckin}=${encodeURIComponent(teacherCheckinRequested)}`;
+            const submitUrl = `https://docs.google.com/forms/d/e/${formId}/formResponse?` + params.toString();
             
             try {
                 await fetch(submitUrl, { method: 'POST', mode: 'no-cors' });
@@ -358,11 +481,22 @@
 
             setTimeout(() => {
                  showView('scanner-container');
-                 document.getElementById('request-checkin-checkbox').checked = false;
-                 selectedReason = null;
-                 document.querySelectorAll('#reason-buttons-container .reason-button').forEach(btn => btn.classList.remove('selected'));
                  startScanBtn.style.display = 'inline-block';
+                 resetStateExceptScan(true);
             }, 4000);
+        }
+
+        function resetStateExceptScan(clearIdDisplay = false) {
+            selectedEmotion = null;
+            selectedReason = null;
+            selectedZone = null;
+            teacherCheckinRequested = 'No';
+            pendingTeacherModal = false;
+            document.querySelectorAll('#reason-buttons-container .reason-button').forEach(btn => btn.classList.remove('selected'));
+            document.querySelectorAll('#zones-ui .zone-card').forEach(card => card.classList.remove('selected'));
+            if (clearIdDisplay) {
+                document.getElementById('student-id-display').innerText = '';
+            }
         }
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -371,4 +505,3 @@
     </script>
 </body>
 </html>
-
