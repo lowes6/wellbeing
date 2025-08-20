@@ -12,7 +12,7 @@
       --primary-1:#007bff; --primary-2:#0056b3;
       --success-1:#28a745; --success-2:#218838;
       --secondary-1:#6c757d; --secondary-2:#495057;
-      --sel-outline:#ffffff; --sel-ring:#111827; /* high contrast */
+      --sel-outline:#ffffff; --sel-ring:#111827;
     }
     *{box-sizing:border-box}
     body{
@@ -73,7 +73,7 @@
     .zone-yellow{background:#f4b400}
     .zone-red{background:#e84545}
 
-    /* Strong visual selected state */
+    /* Selected state */
     .zone-card.selected{
       transform:translateY(-2px) scale(1.03);
       outline:4px solid var(--sel-outline);
@@ -86,7 +86,6 @@
       box-shadow:0 2px 6px rgba(0,0,0,.2);
     }
     .zone-card.selected::before{
-      /* subtle gloss overlay */
       content:""; position:absolute; inset:0; border-radius:16px;
       background:linear-gradient(180deg, rgba(255,255,255,.18), rgba(255,255,255,0) 40%);
       pointer-events:none;
@@ -190,8 +189,9 @@
         <h3 id="teacher-checkin-title">Would you like a teacher to check in with you?</h3>
         <p>Your teacher can speak with you privately to offer support.</p>
         <div class="modal-actions">
+          <!-- Both green; "No, thanks" first -->
+          <button class="action-button submit" onclick="setTeacherCheckinAndSubmit(false)">No, thanks</button>
           <button class="action-button submit" onclick="setTeacherCheckinAndSubmit(true)">Yes, please</button>
-          <button class="action-button secondary" onclick="setTeacherCheckinAndSubmit(false)">No, thanks</button>
         </div>
       </div>
     </div>
@@ -214,14 +214,14 @@
     let selectedZone = null;
     let teacherCheckinRequested = 'No';
 
-    // Google Form config (replace with your actual entry IDs)
+    // Google Form config (your exact entry IDs)
     const formId = "1FAIpQLSeCikiFVOX1Skl9HWWfmzLFJn6_lI-QqO2nWas0m6Qp8-72aQ";
     const entry_studentId = "entry.38022795";
     const entry_wellbeingStatus = "entry.1222227123";
-    const entry_zone = "entry.837029935"; 
+    const entry_zone = "entry.837029935";
     const entry_reason = "entry.1498652664";
     const entry_teacherCheckin = "entry.1178975688";
-  
+
     // Helpers
     function showView(id){
       document.querySelectorAll('.app-container > div').forEach(div=>div.classList.remove('active'));
@@ -266,7 +266,7 @@
       showView('zones-ui');
     }
 
-    // Step 2: Zone (informational only)
+    // Step 2: Zone
     function selectZone(el, zone){
       selectedZone = zone;
       document.querySelectorAll('#zones-ui .zone-card').forEach(card=>{
@@ -334,11 +334,12 @@
       const params = new URLSearchParams();
       params.append(entry_studentId, studentId);
       params.append(entry_wellbeingStatus, selectedEmotion);
+      params.append(entry_zone, selectedZone);
       params.append(entry_reason, selectedReason || 'N/A');
       params.append(entry_teacherCheckin, teacherCheckinRequested || 'No');
-      params.append(entry_zone, selectedZone);
 
       const submitUrl = `https://docs.google.com/forms/d/e/${formId}/formResponse?` + params.toString();
+      console.log('Submit URL:', submitUrl);
 
       try{
         await fetch(submitUrl, { method:'POST', mode:'no-cors' });
@@ -380,5 +381,3 @@
   </script>
 </body>
 </html>
-
-
